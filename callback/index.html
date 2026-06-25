@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OAuth Callback — TahminEtNeOlacak</title>
+  <link rel="icon" href="/assets/logo.png" type="image/png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <img class="logo" src="/assets/logo.png" alt="TahminEtNeOlacak logo">
+      <div class="brand">
+        <h1>TahminEtNeOlacak</h1>
+        <p>OAuth Callback</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h2 style="margin-bottom: 0.75rem;">Authorization result</h2>
+    <p style="color: var(--muted); margin-bottom: 1.5rem;">
+      Use the values below to complete token setup in your local <code>.env</code> file.
+    </p>
+
+    <div id="result"></div>
+
+    <div class="card" style="margin-top: 2rem;">
+      <h3>Next step (TikTok)</h3>
+      <p>
+        Exchange the authorization <strong>code</strong> for tokens via
+        <code>POST https://open.tiktokapis.com/v2/oauth/token/</code>
+        with your client key, client secret, and redirect URI
+        (<code id="redirect-hint"></code>).
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    <a href="/">Home</a> · &copy; 2026 TahminEtNeOlacak
+  </footer>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const state = params.get("state");
+    const error = params.get("error");
+    const errorDesc = params.get("error_description");
+    const root = document.getElementById("result");
+
+    document.getElementById("redirect-hint").textContent =
+      window.location.origin + "/callback";
+
+    function row(label, value, copyable) {
+      if (!value) return "";
+      const id = "val-" + label.replace(/\W/g, "");
+      return (
+        "<p><strong>" + label + ":</strong></p>" +
+        '<div class="code-box" id="' + id + '">' + value + "</div>" +
+        (copyable
+          ? '<button class="btn" style="margin-bottom:1rem" onclick="navigator.clipboard.writeText(document.getElementById(\'' +
+            id +
+            "').textContent)\">Copy</button>"
+          : "")
+      );
+    }
+
+    if (error) {
+      root.innerHTML =
+        '<p class="status-err">Authorization failed</p>' +
+        row("Error", error, false) +
+        row("Description", errorDesc || "", false);
+    } else if (code) {
+      root.innerHTML =
+        '<p class="status-ok">Authorization successful</p>' +
+        row("Code", code, true) +
+        row("State", state || "(none)", true);
+    } else {
+      root.innerHTML =
+        '<p style="color: var(--muted)">No authorization parameters found. ' +
+        "Start the OAuth flow from TikTok Developer Portal or your authorize URL.</p>";
+    }
+  </script>
+</body>
+</html>
